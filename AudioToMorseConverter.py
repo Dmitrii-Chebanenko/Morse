@@ -1,4 +1,3 @@
-import util
 import math
 
 
@@ -9,23 +8,30 @@ class AudioToMorseConverter:
         self.__char_pause = char_pause
         self.__let_pause = let_pause
         self.__word_pause = word_pause
+        self.__tmp_line_len = 0
+        self.__zeros_line_len = 0
 
     def signal_to_morse(self, data, sample_rate):
-        s = ''
-        for word in util.split_arr_zeros(data.tolist(), int(self.__word_pause * sample_rate)):
-            w = ''
-            for let in util.split_arr_zeros(word, int(self.__let_pause * sample_rate)):
-                l = ''
-                for char in util.split_arr_zeros(let, int(self.__char_pause * sample_rate)):
-                    ch = ''
-                    if math.isclose(len(char), int(self.__dot_len * sample_rate), abs_tol=2):
-                        ch = '.'
-                    elif math.isclose(len(char), int(self.__dash_len * sample_rate), abs_tol=2):
-                        ch = '-'
-                    l += ch
-                w+=l
-                w+=' '
-            if w!='':
-                s+=w
-                s+='* '
-        return s[:-3]
+        msg = ""
+        for i in data:
+
+            if i != 0:
+                self.__tmp_line_len += 1
+                if math.isclose(self.__zeros_line_len, int(sample_rate * self.__word_pause), abs_tol=2):
+                    msg += ' * '
+                    self.__zeros_line_len = 0
+                elif math.isclose(self.__zeros_line_len, int(sample_rate * self.__let_pause), abs_tol=2):
+                    msg += ' '
+                    self.__zeros_line_len = 0
+                elif math.isclose(self.__zeros_line_len, int(sample_rate * self.__char_pause), abs_tol=2):
+                    self.__zeros_line_len = 0
+            else:
+                self.__zeros_line_len += 1
+                if math.isclose(self.__tmp_line_len, int(sample_rate * self.__dash_len), abs_tol=2):
+                    msg += '-'
+                    self.__tmp_line_len = 0
+                elif math.isclose(self.__tmp_line_len, int(sample_rate * self.__dot_len), abs_tol=2):
+                    msg += '.'
+                    self.__tmp_line_len = 0
+
+        return msg

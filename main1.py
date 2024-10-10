@@ -4,6 +4,9 @@ from scipy.io.wavfile import read
 from AudioToMorseConverter import AudioToMorseConverter
 from MorseDecoder import MorseDecoder
 
+
+
+
 if __name__ == '__main__':
     dot_len = 0.1
     dash_len = 0.3
@@ -15,7 +18,8 @@ if __name__ == '__main__':
 
     con = AudioToMorseConverter(dot_len, dash_len, char_pause, let_pause, word_pause)
     code_msg = con.signal_to_morse(data, sampling_rate)
-
+    print(code_msg)
     m_d = MorseDecoder(globals.eng_morse_dict)
     msg = m_d.decode_msg(code_msg)
     print(msg)
+
